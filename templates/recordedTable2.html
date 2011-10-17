@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title>録画済一覧</title>
+
+<script type="text/javascript" src="js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.7.2.custom.min.js"></script>
+<link rel="stylesheet" href="start/jquery-ui-1.7.2.custom.css" type="text/css">
+
+{literal}
+<script type="text/javascript">
+<!--
+$(document).ready(function () {
+	$('#floatBox4Dialog').dialog('close');
+});
+
+function deleteDialog(id, title){
+	$('#floatBox4Dialog').dialog({title:'削除',width:500});
+	var str = '<div class="prg_title">' + title + 'を削除します</div>';
+	str += '<form><div style="text-align:center;">録画ファイルも削除する<input type="checkbox" id="delete_file" name="delete_file" value="1" /></div></form>';
+	str +='<div style="margin:2em 0 1em 0;text-align:center;"><a href="javascript:deleteRec(' + id + ')" class="ui-state-default ui-corner-all ui-dialog-buttonpane button">この録画を本当に削除する</a></div>';
+	$('#floatBox4Dialog').html(str);
+	$('#floatBox4Dialog').dialog('open', 'center');
+}
+
+function deleteRec(id){
+	var df = 0;
+	if ($('#delete_file').attr('checked')) {
+		df = 1;
+	}
+	$('#floatBox4Dialog').dialog('close');
+	$('#floatBox4Dialog').html('削除中.......');
+	$('#floatBox4Dialog').dialog('open', 'center');
+	$.get("cancelReservation.php", { reserve_id: id, delete_file: df } ,function(data) {
+		if (data.match(/^error/i)) {
+			$('#floatBox4Dialog').dialog('close');
+			alert(data);
+		} else {
+			$('#rec_' + id ).hide();
+			$('#floatBox4Dialog').dialog('close');
+		}
+	});
+}
+
+function clickMore(tag_id, tag_name) {
+	$(".div_new_rec").hide();
+	$(".tag_" + tag_id).show();
+	$("#tag_info").html("指定「" + tag_name + "」  | <a href=\"javascript:clickBack('" + tag_id + "');\">解除</a>");
+}
+
+function clickBack(tag_id) {
+	$(".tag_" + tag_id).hide();
+	$(".div_new_rec").show();
+	$("#tag_info").html("");
+}
+
+-->
+</script>
+
+
+<style type="text/css">
+
+body {
+	padding: 5px;
+	margin: 0px;
+	font-size: 9pt;
+}
+
+a {
+	text-decoration: none;
+}
+
+
+.small {
+	font-size: 75%;
+}
+.centering {
+	text-align: center;
+}
+
+.div_rec {
+	width: 170px;
+	height: 300px;
+	margin: 2px;
+	padding: 1px;
+	float: left;
+	border: 1px solid black;
+	display: none;
+}
+.div_new_rec {
+	width: 170px;
+	height: 300px;
+	margin: 2px;
+	padding: 1px;
+	float: left;
+	border: 1px solid black;
+	position:relative;
+}
+.more_rec {
+	font-size: 75%;
+	position:absolute;
+	bottom:10px;
+	right:10px;
+}
+
+.ctg_1 {background-color: #FFFFD8;}
+.ctg_2 {background-color: #F2D8FF;}
+.ctg_3 {background-color: #FFD2EB;}
+.ctg_4 {background-color: #FFFFFF;}
+.ctg_5 {background-color: #FFE4C8;}
+.ctg_6 {background-color: #D8FFFF;}
+.ctg_7 {background-color: #D8FFD8;}
+.ctg_8 {background-color: #D8D8FF;}
+.ctg_9 {background-color: #FFD8D8;}
+.ctg_10 {background-color: #E4F4F4;}
+
+
+#floatBox4Dialog .prg_title{font-size:120%;font-weight:bold;padding:0.4em 0;text-align:center;}
+#floatBox4Dialog .prg_rec_cfg{background:#EEE;padding:1em 2em;margin:0.4em 0;}
+#floatBox4Dialog .labelLeft {width:8em;float:left;text-align:right;}
+#floatBox4Dialog .button {padding:0.4em 1em;}
+
+</style>
+{/literal}
+
+</head>
+<body>
+
+
+<p>
+| <a href="index.php" target="_blank">番組表</a> | <a href="programTable.php" target="_blank">番組検索</a> | <a href="keywordTable.php" target="_blank">自動録画</a> | <a href="reservationTable.php" target="_blank">予約一覧</a> | 録画済一覧 | タグ表示 <span id="tag_info"></span> | <br>
+</p>
+
+
+{if count($records)}
+
+{foreach from=$new_records item=rec}
+<div class="div_new_rec ctg_{$rec.category_id}">
+	<span class="small">[{$rec.station_name}] {$rec.category_name}<br>{$rec.starttime}</span><br>
+	{if $use_thumbs == 1}<div class="centering"><a href="viewer.php?reserve_id={$rec.id}"><img class="img_rec" src="thumbs/{$rec.path}.jpg" /></a></div>{/if}
+	<div class="centering">| <a href="viewer.php?reserve_id={$rec.id}">視聴</a> | <a href="video/{$rec.path}">TS</a> |</div>
+	{$rec.title}<br>
+	<span class="small">{$rec.description}</span><br>
+	<div class="more_rec"><a href="javascript:clickMore({$rec.tag_id}, '{$rec.tag_name}');">more...</a></div><br>
+</div>
+{/foreach}
+
+{foreach from=$records item=rec}
+<div id="rec_{$rec.id}" class="div_rec tag_{$rec.tag_id} ctg_{$rec.category_id}">
+	<span class="small">[{$rec.station_name}] {$rec.category_name}<br>{$rec.starttime}</span><br>
+	{if $use_thumbs == 1}<div class="centering"><a href="viewer.php?reserve_id={$rec.id}"><img class="img_rec" src="thumbs/{$rec.path}.jpg" /></a></div>{/if}
+	<div class="centering">| <a href="viewer.php?reserve_id={$rec.id}">視聴</a> | <a href="video/{$rec.path}">TS</a> | <a href="javascript:deleteDialog('{$rec.id}','{$rec.title}')">削除</a> |</div>
+	{$rec.title}<br>
+	<span class="small">{$rec.description}</span><br>
+</div>
+{/foreach}
+
+{else}
+	現在、録画済データはありません
+{/if}
+
+
+<div id="floatBox4Dialog"></div>
+
+
+</body>
+</html>
