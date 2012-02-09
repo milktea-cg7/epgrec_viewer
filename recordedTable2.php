@@ -96,6 +96,14 @@ class classMain {
 			$this->_smarty->assign("tags", $tags);
 			$this->_smarty->assign("use_thumbs", $this->_settings->use_thumbs);
 			
+			// 容量
+			$disk_free_space = disk_free_space(INSTALL_PATH);
+			$disk_total_space = disk_total_space(INSTALL_PATH);
+			$disk_use_space = $disk_total_space - $disk_free_space;
+			$this->_smarty->assign("disk_use_space", number_format(floor($disk_use_space / 1000 / 1000 / 1000)));
+			$this->_smarty->assign("disk_total_space", number_format(floor($disk_total_space / 1000 / 1000 / 1000)));
+			$this->_smarty->assign("disk_per", floor($disk_use_space / $disk_total_space * 100));
+			
 			// 出力
 			$this->_smarty->display("recordedTable2.html");
 		} catch( exception $e ) {
